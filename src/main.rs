@@ -52,7 +52,7 @@ fn ManageTodos() -> Element {
 
     rsx!( div {
         class:"pl-4",
-    AddTodo {}, DisplayTodos {},
+        AddTodo {}, DisplayTodos {},
     })
 }
 
@@ -76,7 +76,7 @@ fn add_todo(mut todo_list: Signal<TodoList>, mut new_name: Signal<String>) {
     todo_list.set(TodoList { list });
 }
 
-fn on_enter(evt: KeyboardEvent, input: Signal<String>, todo_list: Signal<TodoList>) {
+fn add_todo_on_enter(evt: KeyboardEvent, input: Signal<String>, todo_list: Signal<TodoList>) {
     if evt.key() == Key::Enter && !input.read().trim().is_empty() {
         add_todo(todo_list, input);
     }
@@ -94,7 +94,7 @@ fn AddTodo() -> Element {
                 class:"w-[300px] py-2 px-3 border border-pink-500 rounded-lg",
                 placeholder: "Add new todo",
                 oninput: move |event| input.set(event.value()),
-                onkeydown: move |event| on_enter(event, input, todo_list),
+                onkeydown: move |event| add_todo_on_enter(event, input, todo_list),
                 value: "{input}"
             },
             button {
@@ -116,10 +116,52 @@ fn AddTodo() -> Element {
 fn DisplayTodos() -> Element {
     let todo_list = use_context::<Signal<TodoList>>();
 
+    let todos = use_memo(move || {
+        todo_list
+            .read()
+            .list
+            .iter()
+            .filter(|t| !t.done)
+            .cloned()
+            .collect::<Vec<Todo>>()
+    });
+    let dones = use_memo(move || {
+        todo_list
+            .read()
+            .list
+            .iter()
+            .filter(|t| t.done)
+            .cloned()
+            .collect::<Vec<Todo>>()
+    });
+
     rsx! {
         div {
-            for todo in &todo_list.read().list {
-                DisplayTodo { id: todo.id, name: todo.name.clone(), done: todo.done }
+        // active todos
+            if todos.len() != 0 {
+                h2 {
+                    class: "text-xl font-semibold mb-4 text-pink-800",
+                    "Todo ({todos.len()})"
+                }
+                div {
+                    for todo in todos.iter() {
+                        DisplayTodo { id: todo.id, name: todo.name.clone(), done: todo.done }
+                    }
+
+                }
+            }
+    // done
+            if dones.len() != 0 {
+                h2 {
+                    class: "text-xl font-semibold mb-4 text-pink-800 mt-8",
+                    "Done"
+                }
+                div {
+                    for todo in dones.iter() {
+                        DisplayTodo { id: todo.id, name: todo.name.clone(), done: todo.done }
+                    }
+
+                }
             }
         }
     }

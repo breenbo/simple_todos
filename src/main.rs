@@ -91,9 +91,9 @@ fn AddTodo() -> Element {
 
     rsx! {
         div {
-            class: "w-full py-8 flex items-center  gap-x-6",
+            class: "w-full py-8 flex items-center  gap-x-6 px-2",
             input {
-                class:"w-[300px] py-2 px-3 border border-pink-500 rounded-lg",
+                class:"w-full sm:w-8/12 max-w-[800px] py-2 px-3 border border-pink-500 rounded-lg",
                 placeholder: "Add new todo",
                 oninput: move |event| input.set(event.value()),
                 onkeydown: move |event|
@@ -213,7 +213,7 @@ fn DisplayTodo(id: usize, name: String, done: bool) -> Element {
         div {
             class:"w-full flex",
             div {
-                class:"p-2 mb-4 w-10/12 flex items-center justify-between border border-pink-100 border-t-0 border-x-0",
+                class:"p-2 mb-4 w-full sm:w-8/12 max-w-[800px] flex items-center justify-between border border-pink-100 border-t-0 border-x-0",
                 span {
                     class: if done {"line-through"} else {""},
                     "{name}",

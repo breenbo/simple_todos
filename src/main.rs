@@ -84,7 +84,9 @@ fn add_todo_on_enter(evt: KeyboardEvent, input: Signal<String>, todo_list: Signa
 
 #[component]
 fn AddTodo() -> Element {
+    // reactive data inside this component
     let mut input = use_signal(|| "".to_string());
+    // reactive data shared in all children
     let todo_list = use_context::<Signal<TodoList>>();
 
     rsx! {
@@ -94,7 +96,11 @@ fn AddTodo() -> Element {
                 class:"w-[300px] py-2 px-3 border border-pink-500 rounded-lg",
                 placeholder: "Add new todo",
                 oninput: move |event| input.set(event.value()),
-                onkeydown: move |event| add_todo_on_enter(event, input, todo_list),
+                onkeydown: move |event|
+                    add_todo_on_enter(event, input, todo_list),
+                onmounted: move |element| async move {
+                    let _ = element.data().set_focus(true).await;
+                },
                 value: "{input}"
             },
             button {
@@ -114,8 +120,10 @@ fn AddTodo() -> Element {
 
 #[component]
 fn DisplayTodos() -> Element {
+    // reactive data shared in all children
     let todo_list = use_context::<Signal<TodoList>>();
 
+    // like a computed in vue
     let todos = use_memo(move || {
         todo_list
             .read()
@@ -208,7 +216,7 @@ fn DisplayTodo(id: usize, name: String, done: bool) -> Element {
                 class:"p-2 mb-4 w-10/12 flex items-center justify-between border border-pink-100 border-t-0 border-x-0",
                 span {
                     class: if done {"line-through"} else {""},
-                    "{id} - {name}",
+                    "{name}",
                 },
                 div {
                     class:"flex gap-x-4",
